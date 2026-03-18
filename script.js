@@ -6,6 +6,10 @@ let running = false;
 let paused = false;
 let savedTime = 0; // The time saved when pausing
 
+// NYA VARIABLER FÖR TIDSSTÄMPLAR OCH PÅMINNELSER
+let sessionStartTimeFull; // Lagrar hela Date-objektet vid sessionens start
+let hourlyReminderInterval; // För att hantera timpåminnelsen
+
 const display = document.getElementById('display');
 const startButton = document.getElementById('startButton');
 const pauseButton = document.getElementById('pauseButton');
@@ -15,14 +19,26 @@ const reportButton = document.getElementById('reportButton');
 
 function startTimer() {
     if (!running) {
+        // Om det är en helt ny start (inte fortsättning efter paus)
+        if (savedTime === 0) {
+            sessionStartTimeFull = new Date(); // Spara den fullständiga starttiden
+        }
+        
         startTime = new Date().getTime() - savedTime;
         tInterval = setInterval(getShowTime, 1);
         running = true;
         paused = false;
-        startButton.textContent = "Start";
+        startButton.textContent = "Start"; 
         startButton.disabled = true;
         pauseButton.disabled = false;
         stopButton.disabled = false;
+
+        // STARTA TIMPÅMINNELSE
+        // Sätter en intervall som kör sendHourlyReminder varje timme (3600000 ms)
+        // Vi kör den bara om den inte redan är igång
+        if (!hourlyReminderInterval) {
+            hourlyReminderInterval = setInterval(sendHourlyReminder, 3600000); 
+        }
     }
 }
 
@@ -36,6 +52,10 @@ function pauseTimer() {
         startButton.disabled = false;
         pauseButton.disabled = true;
         stopButton.disabled = false;
+
+        // PAUSA TIMPÅMINNELSE
+        clearInterval(hourlyReminderInterval);
+        hourlyReminderInterval = null; // Nollställ intervallet
     }
 }
 
@@ -49,10 +69,22 @@ function stopTimer() {
     startButton.disabled = false;
     pauseButton.disabled = true;
     stopButton.disabled = true;
+
+    // STOPPA TIMPÅMINNELSE
+    clearInterval(hourlyReminderInterval);
+    hourlyReminderInterval = null; // Nollställ intervallet
     
-    // Show recorded time and report button
-    recordedTimeParagraph.textContent = "Tid rapporterad: " + formatTime(difference);
+    // VISA TIDSTÄMPLAR OCH RAPPORTERAD TID
+    if (sessionStartTimeFull) {
+        const startDate = sessionStartTimeFull.toLocaleDateString('sv-SE'); // Formatera datum
+        const startHour = sessionStartTimeFull.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}); // Formatera tid
+        recordedTimeParagraph.innerHTML = `Start: ${startDate} ${startHour}<br>Arbetad tid: ${formatTime(difference)}`;
+    } else {
+        recordedTimeParagraph.textContent = "Ingen tid rapporterad.";
+    }
+    
     reportButton.style.display = 'block'; // Make the report button visible
+    sessionStartTimeFull = null; // Nollställ för nästa session
 }
 
 function getShowTime() {
@@ -82,6 +114,12 @@ function formatTime(ms) {
     return hours + ":" + minutes + ":" + seconds;
 }
 
+// NY FUNKTION FÖR TIMPÅMINNELSE
+function sendHourlyReminder() {
+    // För närvarande en enkel alert. Kan byggas ut senare.
+    alert("Pågår arbetet fortfarande?");
+}
+
 // Initial state of buttons
 startButton.disabled = false;
 pauseButton.disabled = true;
@@ -92,6 +130,5 @@ startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 stopButton.addEventListener('click', stopTimer);
 reportButton.addEventListener('click', () => {
-    // This is where we'll implement the Google Forms integration later
-    alert("Rapportera Tid funktionen kommer snart!");
+    alert("Rapportera Tid funktionen kommer snart!"); // Behålls för Google Forms-integrationen
 });
