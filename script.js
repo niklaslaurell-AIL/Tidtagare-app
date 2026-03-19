@@ -125,10 +125,36 @@ startButton.disabled = false;
 pauseButton.disabled = true;
 stopButton.disabled = true;
 
-// Event Listeners
-startButton.addEventListener('click', startTimer);
-pauseButton.addEventListener('click', pauseTimer);
-stopButton.addEventListener('click', stopTimer);
+// Uppdaterad Event Listener för reportButton
 reportButton.addEventListener('click', () => {
-    alert("Rapportera Tid funktionen kommer snart!"); // Behålls för Google Forms-integrationen
+    // 1. Dina specifika Google Form-detaljer 
+    const formID = https://docs.google.com/forms/d/e/1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw/viewform?usp=pp_url; // ID:t från din formulär-URL
+    const entryDate = "entry.2124734406"; // Ditt ID för Datum
+    const entryStartTime = "entry.1530281242"; // Ditt ID för Starttid
+    const entryDuration = "entry.1549646041"; // Ditt ID för Arbetad tid
+
+    // 2. Hämta värdena från appen
+    const startDateStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE');
+    const startTimeStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : "";
+    const durationStr = formatTime(difference);
+
+    // 3. Bygg URL för att skicka data
+    const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
+    const formData = new URLSearchParams();
+    formData.append(entryDate, startDateStr);
+    formData.append(entryStartTime, startTimeStr);
+    formData.append(entryDuration, durationStr);
+
+    // 4. Skicka datan
+    fetch(`${baseURL}?${formData.toString()}`, {
+        method: 'POST',
+        mode: 'no-cors'
+    }).then(() => {
+        alert("Tiden har rapporterats till Google Forms!");
+        reportButton.style.display = 'none'; // Dölj knappen
+    }).catch(error => {
+        console.error("Fel:", error);
+        alert("Något gick fel.");
+    });
+});
 });
