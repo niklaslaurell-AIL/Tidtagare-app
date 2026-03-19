@@ -4,11 +4,10 @@ let difference;
 let tInterval;
 let running = false;
 let paused = false;
-let savedTime = 0; // The time saved when pausing
+let savedTime = 0; 
 
-// NYA VARIABLER FÖR TIDSSTÄMPLAR OCH PÅMINNELSER
-let sessionStartTimeFull; // Lagrar hela Date-objektet vid sessionens start
-let hourlyReminderInterval; // För att hantera timpåminnelsen
+let sessionStartTimeFull; 
+let hourlyReminderInterval; 
 
 const display = document.getElementById('display');
 const startButton = document.getElementById('startButton');
@@ -19,9 +18,8 @@ const reportButton = document.getElementById('reportButton');
 
 function startTimer() {
     if (!running) {
-        // Om det är en helt ny start (inte fortsättning efter paus)
         if (savedTime === 0) {
-            sessionStartTimeFull = new Date(); // Spara den fullständiga starttiden
+            sessionStartTimeFull = new Date(); 
         }
         
         startTime = new Date().getTime() - savedTime;
@@ -33,9 +31,6 @@ function startTimer() {
         pauseButton.disabled = false;
         stopButton.disabled = false;
 
-        // STARTA TIMPÅMINNELSE
-        // Sätter en intervall som kör sendHourlyReminder varje timme (3600000 ms)
-        // Vi kör den bara om den inte redan är igång
         if (!hourlyReminderInterval) {
             hourlyReminderInterval = setInterval(sendHourlyReminder, 3600000); 
         }
@@ -53,9 +48,8 @@ function pauseTimer() {
         pauseButton.disabled = true;
         stopButton.disabled = false;
 
-        // PAUSA TIMPÅMINNELSE
         clearInterval(hourlyReminderInterval);
-        hourlyReminderInterval = null; // Nollställ intervallet
+        hourlyReminderInterval = null;
     }
 }
 
@@ -63,28 +57,24 @@ function stopTimer() {
     clearInterval(tInterval);
     running = false;
     paused = false;
-    savedTime = 0; // Reset saved time
+    savedTime = 0; 
     display.innerHTML = "00:00:00";
     startButton.textContent = "Start";
     startButton.disabled = false;
     pauseButton.disabled = true;
     stopButton.disabled = true;
 
-    // STOPPA TIMPÅMINNELSE
     clearInterval(hourlyReminderInterval);
-    hourlyReminderInterval = null; // Nollställ intervallet
+    hourlyReminderInterval = null;
     
-    // VISA TIDSTÄMPLAR OCH RAPPORTERAD TID
     if (sessionStartTimeFull) {
-        const startDate = sessionStartTimeFull.toLocaleDateString('sv-SE'); // Formatera datum
-        const startHour = sessionStartTimeFull.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}); // Formatera tid
-        recordedTimeParagraph.innerHTML = `Start: ${startDate} ${startHour}<br>Arbetad tid: ${formatTime(difference)}`;
-    } else {
-        recordedTimeParagraph.textContent = "Ingen tid rapporterad.";
+        const startDate = sessionStartTimeFull.toLocaleDateString('sv-SE'); 
+        const startHour = sessionStartTimeFull.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}); 
+        // Vi visar starttiden här för användaren, även om den inte skickas till Form
+        recordedTimeParagraph.innerHTML = `Starttid: ${startDate} kl ${startHour}<br>Total arbetad tid: ${formatTime(difference)}`;
     }
     
-    reportButton.style.display = 'block'; // Make the report button visible
-    sessionStartTimeFull = null; // Nollställ för nästa session
+    reportButton.style.display = 'block'; 
 }
 
 function getShowTime() {
@@ -114,47 +104,51 @@ function formatTime(ms) {
     return hours + ":" + minutes + ":" + seconds;
 }
 
-// NY FUNKTION FÖR TIMPÅMINNELSE
 function sendHourlyReminder() {
-    // För närvarande en enkel alert. Kan byggas ut senare.
     alert("Pågår arbetet fortfarande?");
 }
 
-// Initial state of buttons
+// Initialt tillstånd
 startButton.disabled = false;
 pauseButton.disabled = true;
 stopButton.disabled = true;
 
-// Uppdaterad Event Listener för reportButton
-reportButton.addEventListener('click', () => {
-    // 1. Dina specifika Google Form-detaljer 
-    const formID = https://docs.google.com/forms/d/e/1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw/viewform?usp=pp_url; // ID:t från din formulär-URL
-    const entryDate = "entry.2124734406"; // Ditt ID för Datum
-    const entryStartTime = "entry.1530281242"; // Ditt ID för Starttid
-    const entryDuration = "entry.1549646041"; // Ditt ID för Arbetad tid
+// Event Listeners
+startButton.addEventListener('click', startTimer);
+pauseButton.addEventListener('click', pauseTimer);
+stopButton.addEventListener('click', stopTimer);
 
-    // 2. Hämta värdena från appen
+// RAPPORTERA-KNAPPEN (Google Forms)
+reportButton.addEventListener('click', () => {
+    // Dina specifika Google Form-detaljer
+    const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
+    const entryDate = "entry.2124734406"; 
+    const entryDuration = "entry.1530281242"; 
+    const entryType = "entry.1549646041"; 
+    const entryCategory = "entry.1847493761"; 
+
+    // Hämta värdena från appen
     const startDateStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE');
-    const startTimeStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : "";
     const durationStr = formatTime(difference);
 
-    // 3. Bygg URL för att skicka data
+    // Bygg URL för att skicka data
     const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
     const formData = new URLSearchParams();
     formData.append(entryDate, startDateStr);
-    formData.append(entryStartTime, startTimeStr);
     formData.append(entryDuration, durationStr);
+    formData.append(entryType, "Interntid grundare");
+    formData.append(entryCategory, "Sälj");
 
-    // 4. Skicka datan
+    // Skicka datan till Google Forms
     fetch(`${baseURL}?${formData.toString()}`, {
         method: 'POST',
         mode: 'no-cors'
     }).then(() => {
         alert("Tiden har rapporterats till Google Forms!");
-        reportButton.style.display = 'none'; // Dölj knappen
+        reportButton.style.display = 'none'; 
+        recordedTimeParagraph.textContent = "Tiden är inskickad!";
     }).catch(error => {
         console.error("Fel:", error);
-        alert("Något gick fel.");
+        alert("Något gick fel vid rapporteringen.");
     });
-});
 });
