@@ -16,6 +16,9 @@ const stopButton = document.getElementById('stopButton');
 const recordedTimeParagraph = document.getElementById('recordedTime');
 const reportButton = document.getElementById('reportButton');
 
+// Din fasta e-postadress (du kan ändra denna om någon annan ska använda appen)
+const userEmail = "niklas.laurell@aignitionlabs.se";
+
 function startTimer() {
     if (!running) {
         if (savedTime === 0) {
@@ -70,7 +73,6 @@ function stopTimer() {
     if (sessionStartTimeFull) {
         const startDate = sessionStartTimeFull.toLocaleDateString('sv-SE'); 
         const startHour = sessionStartTimeFull.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}); 
-        // Vi visar starttiden här för användaren, även om den inte skickas till Form
         recordedTimeParagraph.innerHTML = `Starttid: ${startDate} kl ${startHour}<br>Total arbetad tid: ${formatTime(difference)}`;
     }
     
@@ -120,8 +122,9 @@ stopButton.addEventListener('click', stopTimer);
 
 // RAPPORTERA-KNAPPEN (Google Forms)
 reportButton.addEventListener('click', () => {
-    // Dina specifika Google Form-detaljer
+    // Dina specifika Google Form-detaljer från den senaste länken
     const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
+    const entryEmail = "entry.2093776201"; // Ditt nya ID för e-post
     const entryDate = "entry.2124734406"; 
     const entryDuration = "entry.1530281242"; 
     const entryType = "entry.1549646041"; 
@@ -134,6 +137,9 @@ reportButton.addEventListener('click', () => {
     // Bygg URL för att skicka data
     const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
     const formData = new URLSearchParams();
+    
+    // Lägg till alla fält
+    formData.append(entryEmail, userEmail); // Skickar med e-posten automatiskt
     formData.append(entryDate, startDateStr);
     formData.append(entryDuration, durationStr);
     formData.append(entryType, "Interntid grundare");
@@ -146,7 +152,7 @@ reportButton.addEventListener('click', () => {
     }).then(() => {
         alert("Tiden har rapporterats till Google Forms!");
         reportButton.style.display = 'none'; 
-        recordedTimeParagraph.textContent = "Tiden är inskickad!";
+        recordedTimeParagraph.textContent = "Tiden är inskickad för: " + userEmail;
     }).catch(error => {
         console.error("Fel:", error);
         alert("Något gick fel vid rapporteringen.");
