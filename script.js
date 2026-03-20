@@ -16,6 +16,7 @@ const stopButton = document.getElementById('stopButton');
 const recordedTimeParagraph = document.getElementById('recordedTime');
 const reportButton = document.getElementById('reportButton');
 
+// Din fasta e-postadress för rapportering
 const userEmail = "niklas.laurell@aignitionlabs.se";
 
 function startTimer() {
@@ -109,27 +110,35 @@ function sendHourlyReminder() {
     alert("Pågår arbetet fortfarande?");
 }
 
+// Initialt tillstånd
 startButton.disabled = false;
 pauseButton.disabled = true;
 stopButton.disabled = true;
 
+// Event Listeners för knappar
 startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 stopButton.addEventListener('click', stopTimer);
 
+// RAPPORTERA-KNAPPEN (Google Forms)
 reportButton.addEventListener('click', () => {
+    // Dina specifika Google Form-detaljer
     const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
+    
     const entryEmail = "entry.2093776201"; 
     const entryDate = "entry.2124734406"; 
     const entryDuration = "entry.1530281242"; 
     const entryType = "entry.1549646041"; 
     const entryCategory = "entry.1847493761"; 
 
+    // Formatera datumet exakt för Google Forms (YYYY-MM-DD)
     const startDateStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE');
     const durationStr = formatTime(difference);
 
+    // Bas-URL för inskickning
     const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
     
+    // Bygg upp all data som ska skickas
     const formData = new URLSearchParams();
     formData.append(entryEmail, userEmail);
     formData.append(entryDate, startDateStr);
@@ -137,6 +146,7 @@ reportButton.addEventListener('click', () => {
     formData.append(entryType, "Interntid grundare");
     formData.append(entryCategory, "Sälj");
 
+    // Skicka datan med POST-metoden (mode no-cors används för att undvika blockeringsfel)
     fetch(baseURL, {
         method: 'POST',
         mode: 'no-cors',
@@ -145,6 +155,7 @@ reportButton.addEventListener('click', () => {
         },
         body: formData.toString()
     }).then(() => {
+        // Eftersom vi kör mode: 'no-cors' kommer anropet alltid se ut som det lyckades.
         alert("Tiden har rapporterats till Google Forms!");
         reportButton.style.display = 'none'; 
         recordedTimeParagraph.textContent = "Tiden är inskickad för: " + userEmail;
