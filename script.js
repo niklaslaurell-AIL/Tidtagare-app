@@ -16,7 +16,6 @@ const stopButton = document.getElementById('stopButton');
 const recordedTimeParagraph = document.getElementById('recordedTime');
 const reportButton = document.getElementById('reportButton');
 
-// Din fasta e-postadress (du kan ändra denna om någon annan ska använda appen)
 const userEmail = "niklas.laurell@aignitionlabs.se";
 
 function startTimer() {
@@ -110,17 +109,14 @@ function sendHourlyReminder() {
     alert("Pågår arbetet fortfarande?");
 }
 
-// Initialt tillstånd
 startButton.disabled = false;
 pauseButton.disabled = true;
 stopButton.disabled = true;
 
-// Event Listeners
 startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 stopButton.addEventListener('click', stopTimer);
 
-// RAPPORTERA-KNAPPEN (Google Forms)
 reportButton.addEventListener('click', () => {
     const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
     const entryEmail = "entry.2093776201"; 
@@ -134,7 +130,6 @@ reportButton.addEventListener('click', () => {
 
     const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
     
-    // Vi skapar ett URLSearchParams-objekt för kroppen av anropet
     const formData = new URLSearchParams();
     formData.append(entryEmail, userEmail);
     formData.append(entryDate, startDateStr);
@@ -142,42 +137,13 @@ reportButton.addEventListener('click', () => {
     formData.append(entryType, "Interntid grundare");
     formData.append(entryCategory, "Sälj");
 
-    // NYTT SÄTT ATT SKICKA: Vi lägger datan i 'body' istället för i URL:en
     fetch(baseURL, {
         method: 'POST',
-        mode: 'no-cors', // Fortfarande no-cors för att undvika blockeringsfel
+        mode: 'no-cors',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: formData.toString()
-    }).then(() => {
-        alert("Tiden har rapporterats till Google Forms!");
-        reportButton.style.display = 'none'; 
-        recordedTimeParagraph.textContent = "Tiden är inskickad för: " + userEmail;
-    }).catch(error => {
-        console.error("Fel:", error);
-        alert("Något gick fel vid rapporteringen.");
-    });
-});
-    // Hämta värdena från appen
-    const startDateStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE');
-    const durationStr = formatTime(difference);
-
-    // Bygg URL för att skicka data
-    const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
-    const formData = new URLSearchParams();
-    
-    // Lägg till alla fält
-    formData.append(entryEmail, userEmail); // Skickar med e-posten automatiskt
-    formData.append(entryDate, startDateStr);
-    formData.append(entryDuration, durationStr);
-    formData.append(entryType, "Interntid grundare");
-    formData.append(entryCategory, "Sälj");
-
-    // Skicka datan till Google Forms
-    fetch(`${baseURL}?${formData.toString()}`, {
-        method: 'POST',
-        mode: 'no-cors'
     }).then(() => {
         alert("Tiden har rapporterats till Google Forms!");
         reportButton.style.display = 'none'; 
