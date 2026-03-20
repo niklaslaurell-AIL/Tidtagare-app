@@ -120,7 +120,7 @@ startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 stopButton.addEventListener('click', stopTimer);
 
-// RAPPORTERA-KNAPPEN (Google Forms)
+// RAPPORTERA-KNAPPEN (Säker metod för Google Workspace)
 reportButton.addEventListener('click', () => {
     // Dina specifika Google Form-detaljer
     const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
@@ -131,36 +131,24 @@ reportButton.addEventListener('click', () => {
     const entryType = "entry.1549646041"; 
     const entryCategory = "entry.1847493761"; 
 
-    // Formatera datumet exakt för Google Forms (YYYY-MM-DD)
+    // Formatera värden
     const startDateStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE');
     const durationStr = formatTime(difference);
 
-    // Bas-URL för inskickning
+    // Bygg URL för att skicka direkt via webbläsaren
     const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
     
-    // Bygg upp all data som ska skickas
-    const formData = new URLSearchParams();
-    formData.append(entryEmail, userEmail);
-    formData.append(entryDate, startDateStr);
-    formData.append(entryDuration, durationStr);
-    formData.append(entryType, "Interntid grundare");
-    formData.append(entryCategory, "Sälj");
+    const params = new URLSearchParams();
+    params.append(entryEmail, userEmail);
+    params.append(entryDate, startDateStr);
+    params.append(entryDuration, durationStr);
+    params.append(entryType, "Interntid grundare");
+    params.append(entryCategory, "Sälj");
+    params.append("submit", "Submit"); 
 
-    // Skicka datan med POST-metoden (mode no-cors används för att undvika blockeringsfel)
-    fetch(baseURL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: formData.toString()
-    }).then(() => {
-        // Eftersom vi kör mode: 'no-cors' kommer anropet alltid se ut som det lyckades.
-        alert("Tiden har rapporterats till Google Forms!");
-        reportButton.style.display = 'none'; 
-        recordedTimeParagraph.textContent = "Tiden är inskickad för: " + userEmail;
-    }).catch(error => {
-        console.error("Fel:", error);
-        alert("Något gick fel vid rapporteringen.");
-    });
+    // Den slutgiltiga URL:en med parametrar
+    const finalURL = `${baseURL}?${params.toString()}`;
+
+    // Vi surfar till Google för att utnyttja inloggningen i webbläsaren
+    window.location.href = finalURL;
 });
