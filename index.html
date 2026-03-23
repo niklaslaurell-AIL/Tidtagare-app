@@ -11,7 +11,22 @@
         <h1>Arbetstid Tidtagare</h1>
         
         <div class="user-info">
-            <input type="email" id="emailInput" placeholder="Din e-postadress" style="padding: 8px; width: 80%; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
+            <input type="email" id="emailInput" placeholder="Din e-postadress" class="input-field">
+            
+            <div class="selectors">
+                <select id="typeSelect" class="input-field">
+                    <option value="Interntid grundare">Interntid grundare</option>
+                    <option value="Kundprojekt">Kundprojekt</option>
+                    <option value="Övrigt">Övrigt</option>
+                </select>
+                
+                <select id="categorySelect" class="input-field">
+                    <option value="Sälj">Sälj</option>
+                    <option value="Utveckling">Utveckling</option>
+                    <option value="Administration">Administration</option>
+                    <option value="Möte">Möte</option>
+                </select>
+            </div>
         </div>
 
         <div id="display" class="timer-display">00:00:00</div>

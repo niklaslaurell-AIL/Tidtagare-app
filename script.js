@@ -16,13 +16,14 @@ const stopButton = document.getElementById('stopButton');
 const recordedTimeParagraph = document.getElementById('recordedTime');
 const reportButton = document.getElementById('reportButton');
 const emailInput = document.getElementById('emailInput');
+const typeSelect = document.getElementById('typeSelect');
+const categorySelect = document.getElementById('categorySelect');
 
-// Ladda sparad e-post från webbläsarens minne vid start
+// Ladda sparade inställningar från webbläsarens minne vid start
 window.onload = function() {
-    const savedEmail = localStorage.getItem('userEmail');
-    if (savedEmail) {
-        emailInput.value = savedEmail;
-    }
+    if (localStorage.getItem('userEmail')) emailInput.value = localStorage.getItem('userEmail');
+    if (localStorage.getItem('userType')) typeSelect.value = localStorage.getItem('userType');
+    if (localStorage.getItem('userCategory')) categorySelect.value = localStorage.getItem('userCategory');
 };
 
 function startTimer() {
@@ -126,17 +127,21 @@ startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 stopButton.addEventListener('click', stopTimer);
 
-// RAPPORTERA-KNAPPEN (Dynamisk e-posthantering)
+// RAPPORTERA-KNAPPEN
 reportButton.addEventListener('click', () => {
     const userEmail = emailInput.value.trim();
+    const selectedType = typeSelect.value;
+    const selectedCategory = categorySelect.value;
     
     if (!userEmail) {
-        alert("Vänligen fyll i din e-postadress innan du rapporterar!");
+        alert("Vänligen fyll i din e-postadress!");
         return;
     }
 
-    // Spara e-posten i webbläsarens minne för nästa gång
+    // Spara valen i webbläsaren
     localStorage.setItem('userEmail', userEmail);
+    localStorage.setItem('userType', selectedType);
+    localStorage.setItem('userCategory', selectedCategory);
 
     const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
     
@@ -155,8 +160,8 @@ reportButton.addEventListener('click', () => {
     params.append(entryEmail, userEmail);
     params.append(entryDate, startDateStr);
     params.append(entryDuration, durationStr);
-    params.append(entryType, "Interntid grundare");
-    params.append(entryCategory, "Sälj");
+    params.append(entryType, selectedType);
+    params.append(entryCategory, selectedCategory);
     params.append("submit", "Submit"); 
 
     const finalURL = `${baseURL}?${params.toString()}`;
