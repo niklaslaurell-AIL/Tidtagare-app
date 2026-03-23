@@ -113,7 +113,7 @@ startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 stopButton.addEventListener('click', stopTimer);
 
-// RAPPORTERA-KNAPPEN (Dold formulär-metod)
+// RAPPORTERA-KNAPPEN (Pre-filled link metod)
 reportButton.addEventListener('click', () => {
     const userEmail = emailInput.value.trim();
     const selectedType = typeSelect.value;
@@ -129,31 +129,20 @@ reportButton.addEventListener('click', () => {
     localStorage.setItem('userCategory', selectedCategory);
 
     const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
-    const actionURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
+    
+    // Bas-URL för "viewform" med ifyllda fält
+    const baseURL = `https://docs.google.com/forms/d/e/${formID}/viewform`;
+    
+    const params = new URLSearchParams();
+    params.append("usp", "pp_url");
+    params.append("entry.2093776201", userEmail);
+    params.append("entry.2124734406", sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE'));
+    params.append("entry.1530281242", formatTime(difference));
+    params.append("entry.1549646041", selectedType);
+    params.append("entry.1847493761", selectedCategory);
 
-    // Vi skapar ett dolt formulär-element
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = actionURL;
-    form.style.display = 'none';
-
-    // Hjälpfunktion för att lägga till fält
-    const addField = (name, value) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = value;
-        form.appendChild(input);
-    };
-
-    // Lägg till alla entry-ID:n
-    addField("entry.2093776201", userEmail);
-    addField("entry.2124734406", sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE'));
-    addField("entry.1530281242", formatTime(difference));
-    addField("entry.1549646041", selectedType);
-    addField("entry.1847493761", selectedCategory);
-
-    // Skicka in formuläret
-    document.body.appendChild(form);
-    form.submit();
+    const finalURL = `${baseURL}?${params.toString()}`;
+    
+    // Öppna i en ny flik så att man inte tappar bort tidtagaren
+    window.open(finalURL, '_blank');
 });
