@@ -19,7 +19,6 @@ const emailInput = document.getElementById('emailInput');
 const typeSelect = document.getElementById('typeSelect');
 const categorySelect = document.getElementById('categorySelect');
 
-// Ladda sparade inställningar från webbläsarens minne vid start
 window.onload = function() {
     if (localStorage.getItem('userEmail')) emailInput.value = localStorage.getItem('userEmail');
     if (localStorage.getItem('userType')) typeSelect.value = localStorage.getItem('userType');
@@ -31,7 +30,6 @@ function startTimer() {
         if (savedTime === 0) {
             sessionStartTimeFull = new Date(); 
         }
-        
         startTime = new Date().getTime() - savedTime;
         tInterval = setInterval(getShowTime, 1);
         running = true;
@@ -40,7 +38,6 @@ function startTimer() {
         startButton.disabled = true;
         pauseButton.disabled = false;
         stopButton.disabled = false;
-
         if (!hourlyReminderInterval) {
             hourlyReminderInterval = setInterval(sendHourlyReminder, 3600000); 
         }
@@ -57,7 +54,6 @@ function pauseTimer() {
         startButton.disabled = false;
         pauseButton.disabled = true;
         stopButton.disabled = false;
-
         clearInterval(hourlyReminderInterval);
         hourlyReminderInterval = null;
     }
@@ -73,31 +69,25 @@ function stopTimer() {
     startButton.disabled = false;
     pauseButton.disabled = true;
     stopButton.disabled = true;
-
     clearInterval(hourlyReminderInterval);
     hourlyReminderInterval = null;
-    
     if (sessionStartTimeFull) {
         const startDate = sessionStartTimeFull.toLocaleDateString('sv-SE'); 
         const startHour = sessionStartTimeFull.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}); 
         recordedTimeParagraph.innerHTML = `Starttid: ${startDate} kl ${startHour}<br>Total arbetad tid: ${formatTime(difference)}`;
     }
-    
     reportButton.style.display = 'block'; 
 }
 
 function getShowTime() {
     updatedTime = new Date().getTime();
     difference = updatedTime - startTime;
-
     let hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     let minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
     let seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
     hours = (hours < 10) ? "0" + hours : hours;
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;
-
     display.innerHTML = hours + ":" + minutes + ":" + seconds;
 }
 
@@ -105,11 +95,9 @@ function formatTime(ms) {
     let hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     let minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
     let seconds = Math.floor((ms % (1000 * 60)) / 1000);
-
     hours = (hours < 10) ? "0" + hours : hours;
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;
-
     return hours + ":" + minutes + ":" + seconds;
 }
 
@@ -117,17 +105,15 @@ function sendHourlyReminder() {
     alert("Pågår arbetet fortfarande?");
 }
 
-// Initialt tillstånd
 startButton.disabled = false;
 pauseButton.disabled = true;
 stopButton.disabled = true;
 
-// Event Listeners för knappar
 startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 stopButton.addEventListener('click', stopTimer);
 
-// RAPPORTERA-KNAPPEN (Säker metod för Google Workspace)
+// RAPPORTERA-KNAPPEN (Dold formulär-metod)
 reportButton.addEventListener('click', () => {
     const userEmail = emailInput.value.trim();
     const selectedType = typeSelect.value;
@@ -138,37 +124,36 @@ reportButton.addEventListener('click', () => {
         return;
     }
 
-    // Spara valen i webbläsarens minne
     localStorage.setItem('userEmail', userEmail);
     localStorage.setItem('userType', selectedType);
     localStorage.setItem('userCategory', selectedCategory);
 
-    // Dina specifika Google Form-detaljer
     const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
-    
-    const entryEmail = "entry.2093776201"; 
-    const entryDate = "entry.2124734406"; 
-    const entryDuration = "entry.1530281242"; 
-    const entryType = "entry.1549646041"; 
-    const entryCategory = "entry.1847493761"; 
+    const actionURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
 
-    // Formatera datumet (YYYY-MM-DD)
-    const startDateStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE');
-    const durationStr = formatTime(difference);
+    // Vi skapar ett dolt formulär-element
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = actionURL;
+    form.style.display = 'none';
 
-    // Bas-URL för inskickning
-    const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
-    
-    // Bygg upp parametrarna för URL:en
-    const params = new URLSearchParams();
-    params.append(entryEmail, userEmail);
-    params.append(entryDate, startDateStr);
-    params.append(entryDuration, durationStr);
-    params.append(entryType, selectedType);
-    params.append(entryCategory, selectedCategory);
-    params.append("submit", "Submit"); 
+    // Hjälpfunktion för att lägga till fält
+    const addField = (name, value) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    };
 
-    // Skapa den slutgiltiga länken och skicka användaren dit
-    const finalURL = `${baseURL}?${params.toString()}`;
-    window.location.href = finalURL;
+    // Lägg till alla entry-ID:n
+    addField("entry.2093776201", userEmail);
+    addField("entry.2124734406", sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE'));
+    addField("entry.1530281242", formatTime(difference));
+    addField("entry.1549646041", selectedType);
+    addField("entry.1847493761", selectedCategory);
+
+    // Skicka in formuläret
+    document.body.appendChild(form);
+    form.submit();
 });
