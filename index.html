@@ -14,17 +14,20 @@
             <input type="email" id="emailInput" placeholder="Din e-postadress" class="input-field">
             
             <div class="selectors">
+                <label for="typeSelect" style="font-size: 0.9em; color: #666; align-self: flex-start; margin-left: 5%;">Typ av arbete:</label>
                 <select id="typeSelect" class="input-field">
                     <option value="Interntid grundare">Interntid grundare</option>
-                    <option value="Kundprojekt">Kundprojekt</option>
-                    <option value="Övrigt">Övrigt</option>
+                    <option value="Interntid debiterbar (sådant som är beordrat)">Interntid debiterbar</option>
+                    <option value="Externtid (som debiteras)">Externtid (debiteras)</option>
                 </select>
                 
+                <label for="categorySelect" style="font-size: 0.9em; color: #666; align-self: flex-start; margin-left: 5%;">Sysselsättning:</label>
                 <select id="categorySelect" class="input-field">
-                    <option value="Sälj">Sälj</option>
-                    <option value="Utveckling">Utveckling</option>
                     <option value="Administration">Administration</option>
-                    <option value="Möte">Möte</option>
+                    <option value="Bygge interna vertyg">Bygge interna vertyg</option>
+                    <option value="Sälj">Sälj</option>
+                    <option value="Internmöte">Internmöte</option>
+                    <option value="Teknisk utveckling">Teknisk utveckling</option>
                 </select>
             </div>
         </div>
