@@ -15,9 +15,15 @@ const pauseButton = document.getElementById('pauseButton');
 const stopButton = document.getElementById('stopButton');
 const recordedTimeParagraph = document.getElementById('recordedTime');
 const reportButton = document.getElementById('reportButton');
+const emailInput = document.getElementById('emailInput');
 
-// Din fasta e-postadress för rapportering
-const userEmail = "niklas.laurell@aignitionlabs.se";
+// Ladda sparad e-post från webbläsarens minne vid start
+window.onload = function() {
+    const savedEmail = localStorage.getItem('userEmail');
+    if (savedEmail) {
+        emailInput.value = savedEmail;
+    }
+};
 
 function startTimer() {
     if (!running) {
@@ -120,9 +126,18 @@ startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 stopButton.addEventListener('click', stopTimer);
 
-// RAPPORTERA-KNAPPEN (Säker metod för Google Workspace)
+// RAPPORTERA-KNAPPEN (Dynamisk e-posthantering)
 reportButton.addEventListener('click', () => {
-    // Dina specifika Google Form-detaljer
+    const userEmail = emailInput.value.trim();
+    
+    if (!userEmail) {
+        alert("Vänligen fyll i din e-postadress innan du rapporterar!");
+        return;
+    }
+
+    // Spara e-posten i webbläsarens minne för nästa gång
+    localStorage.setItem('userEmail', userEmail);
+
     const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
     
     const entryEmail = "entry.2093776201"; 
@@ -131,11 +146,9 @@ reportButton.addEventListener('click', () => {
     const entryType = "entry.1549646041"; 
     const entryCategory = "entry.1847493761"; 
 
-    // Formatera värden
     const startDateStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE');
     const durationStr = formatTime(difference);
 
-    // Bygg URL för att skicka direkt via webbläsaren
     const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
     
     const params = new URLSearchParams();
@@ -146,9 +159,6 @@ reportButton.addEventListener('click', () => {
     params.append(entryCategory, "Sälj");
     params.append("submit", "Submit"); 
 
-    // Den slutgiltiga URL:en med parametrar
     const finalURL = `${baseURL}?${params.toString()}`;
-
-    // Vi surfar till Google för att utnyttja inloggningen i webbläsaren
     window.location.href = finalURL;
 });
