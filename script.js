@@ -127,7 +127,7 @@ startButton.addEventListener('click', startTimer);
 pauseButton.addEventListener('click', pauseTimer);
 stopButton.addEventListener('click', stopTimer);
 
-// RAPPORTERA-KNAPPEN
+// RAPPORTERA-KNAPPEN (Säker metod för Google Workspace)
 reportButton.addEventListener('click', () => {
     const userEmail = emailInput.value.trim();
     const selectedType = typeSelect.value;
@@ -138,11 +138,12 @@ reportButton.addEventListener('click', () => {
         return;
     }
 
-    // Spara valen i webbläsaren
+    // Spara valen i webbläsarens minne
     localStorage.setItem('userEmail', userEmail);
     localStorage.setItem('userType', selectedType);
     localStorage.setItem('userCategory', selectedCategory);
 
+    // Dina specifika Google Form-detaljer
     const formID = "1FAIpQLScJOWsXlr-h0cNkH3zr4FlTLlknmZ_YjVQqRvezLPsMrLpAyw"; 
     
     const entryEmail = "entry.2093776201"; 
@@ -151,11 +152,14 @@ reportButton.addEventListener('click', () => {
     const entryType = "entry.1549646041"; 
     const entryCategory = "entry.1847493761"; 
 
+    // Formatera datumet (YYYY-MM-DD)
     const startDateStr = sessionStartTimeFull ? sessionStartTimeFull.toLocaleDateString('sv-SE') : new Date().toLocaleDateString('sv-SE');
     const durationStr = formatTime(difference);
 
+    // Bas-URL för inskickning
     const baseURL = `https://docs.google.com/forms/d/e/${formID}/formResponse`;
     
+    // Bygg upp parametrarna för URL:en
     const params = new URLSearchParams();
     params.append(entryEmail, userEmail);
     params.append(entryDate, startDateStr);
@@ -164,6 +168,7 @@ reportButton.addEventListener('click', () => {
     params.append(entryCategory, selectedCategory);
     params.append("submit", "Submit"); 
 
+    // Skapa den slutgiltiga länken och skicka användaren dit
     const finalURL = `${baseURL}?${params.toString()}`;
     window.location.href = finalURL;
 });
